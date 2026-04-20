@@ -1,21 +1,130 @@
-<<<<<<< HEAD
-# React + Vite
+# 🏠 Roommate Compatibility Matcher
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A smart web application that helps students find the most compatible roommates based on lifestyle, habits, and personal preferences.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Live Demo
+👉 https://roommate-matcher-mu-roan.vercel.app/
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎯 Problem Statement
 
-## Expanding the ESLint configuration
+Students are often assigned roommates randomly, leading to conflicts due to mismatched habits, routines, and lifestyles.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-# roommate-matcher
-A smart roommate matching platform that pairs students based on lifestyle compatibility. Users complete a preference questionnaire, and the system calculates compatibility scores using weighted traits like sleep, cleanliness, and social habits, delivering personalized, explainable roommate matches.
->>>>>>> 3a7ed92f64fe6a9f0e7a4f688f9001e13923a465
+This project solves that by:
+- Collecting structured user preferences
+- Analyzing compatibility using a scoring algorithm
+- Matching users with the most compatible roommates
+
+---
+
+## 💡 Features
+
+- 🔐 User Authentication (Signup/Login)
+- 🧾 Dynamic Questionnaire for preferences
+- 🧠 Compatibility Matching Algorithm
+- 📊 Compatibility Score (in %)
+- 🤝 “Why Match” explanations (insightful reasoning)
+- 🏠 Dashboard for navigation
+- 📱 Responsive UI (mobile + desktop)
+
+---
+
+## 🧠 How It Works
+
+1. Users sign up and log in  
+2. Fill out a questionnaire (sleep, cleanliness, noise, etc.)  
+3. Data is stored in Firebase  
+4. The system compares user profiles  
+5. Generates compatibility scores using weighted differences  
+6. Displays top matches with explanations  
+
+---
+
+## 🧮 Matching Algorithm
+
+The compatibility score is calculated using:
+
+Compatibility = 100 − Σ (weight × difference in traits)
+
+- Each trait (sleep, cleanliness, etc.) is assigned a weight
+- Smaller differences → higher compatibility
+- Larger differences → lower compatibility
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React (Vite)
+- React Router
+- Context API
+- Tailwind CSS
+
+### Backend
+- Firebase Authentication
+- Firestore Database
+
+### Deployment
+- Vercel
+
+---
+
+## 📁 Project Structure
+src/
+├── components/
+├── pages/
+├── context/
+├── services/
+├── hooks/
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file locally:
+VITE_API_KEY=…
+VITE_AUTH_DOMAIN=…
+VITE_PROJECT_ID=…
+VITE_STORAGE_BUCKET=…
+VITE_MESSAGING_SENDER_ID=…
+VITE_APP_ID=…
+VITE_MEASUREMENT_ID=…
+
+---
+
+## ⚙️ Setup Instructions
+
+
+# Clone repo
+git clone https://github.com/your-username/roommate-matcher.git
+
+# Go into project
+cd roommate-matcher
+
+# Install dependencies
+npm install
+
+# Run locally
+npm run dev
+
+⸻
+
+🧑‍💻 Author
+
+Udayveer Singh
+
+⸻
+
+📌 Final Note
+
+This project demonstrates:
+
+* Real-world problem solving
+* Strong React fundamentals
+* Backend integration
+* Scalable architecture
+
+Built as a production-level portfolio project 🚀
