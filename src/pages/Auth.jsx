@@ -9,6 +9,7 @@ function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [gender, setGender] = useState("");
   const nav = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,7 +19,7 @@ function Auth() {
         await login(email, password);
         nav("/dashboard");
       } else {
-        await signup(email, password, fullName);
+        await signup(email, password, fullName, gender);
         nav("/dashboard");
       }
     } catch (err) {
@@ -53,17 +54,33 @@ function Auth() {
             
             <form onSubmit={handleSubmit} className="space-y-6">
               {!isLogin && (
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 uppercase tracking-wide">Full Name</label>
-                  <input
-                    type="text"
-                    placeholder="John Doe"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-700/80 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 dark:text-slate-100"
-                    required={!isLogin}
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 uppercase tracking-wide">Full Name</label>
+                    <input
+                      type="text"
+                      placeholder="John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-700/80 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 dark:text-slate-100"
+                      required={!isLogin}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 uppercase tracking-wide">Gender</label>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      required={!isLogin}
+                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-700/80 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-800 dark:text-slate-100"
+                    >
+                      <option value="" disabled>Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </>
               )}
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 uppercase tracking-wide">Email address</label>
@@ -104,6 +121,7 @@ function Auth() {
                   setEmail("");
                   setPassword("");
                   setFullName("");
+                  setGender("");
                 }} 
                 className="ml-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors font-bold underline decoration-2 underline-offset-4"
               >

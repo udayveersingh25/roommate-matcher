@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../services/firebase";
+import { auth, db } from "../services/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -16,11 +17,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const signup = async (email, password, fullName) => {
+  const signup = async (email, password, fullName, gender) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     if (fullName) {
       await updateProfile(userCredential.user, { displayName: fullName });
     }
+    
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      gender: gender || "Other",
+      fullName: fullName || email.split('@')[0],
+      email: email
+    }, { merge: true });
+
     return userCredential;
   };
 
