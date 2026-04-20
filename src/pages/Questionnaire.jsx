@@ -31,8 +31,9 @@ export default function Questionnaire() {
         try {
             await setDoc(doc(db, "users", user.uid), {
                 email: user.email,
+                fullName: user.displayName || user.email.split('@')[0],
                 profile: formData
-            });
+            }, { merge: true });
             nav("/matches");
             alert("Profile saved!");
 

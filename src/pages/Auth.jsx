@@ -8,6 +8,7 @@ function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const nav = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -17,7 +18,7 @@ function Auth() {
         await login(email, password);
         nav("/dashboard");
       } else {
-        await signup(email, password);
+        await signup(email, password, fullName);
         nav("/dashboard");
       }
     } catch (err) {
@@ -51,6 +52,19 @@ function Auth() {
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
+              {!isLogin && (
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 uppercase tracking-wide">Full Name</label>
+                  <input
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-700/80 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium text-slate-800 dark:text-slate-100"
+                    required={!isLogin}
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 uppercase tracking-wide">Email address</label>
                 <input
@@ -89,6 +103,7 @@ function Auth() {
                   setIsLogin(!isLogin);
                   setEmail("");
                   setPassword("");
+                  setFullName("");
                 }} 
                 className="ml-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors font-bold underline decoration-2 underline-offset-4"
               >

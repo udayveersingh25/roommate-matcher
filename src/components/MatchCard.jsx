@@ -32,9 +32,9 @@ export default function MatchCard({ match }) {
             <div className="flex justify-between items-center border-b border-slate-100/80 dark:border-indigo-500/10 pb-5 mb-5">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md text-lg">
-                        {match.email.charAt(0).toUpperCase()}
+                        {(match.fullName || match.email || "?").charAt(0).toUpperCase()}
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 tracking-tight">{match.email.split('@')[0]}</h3>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 tracking-tight">{match.fullName || (match.email ? match.email.split('@')[0] : "User")}</h3>
                 </div>
                 
                 <div className="flex flex-col items-end">
