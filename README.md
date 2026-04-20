@@ -5,7 +5,7 @@ A smart web application that helps students find the most compatible roommates b
 ---
 
 ## 🚀 Live Demo
-👉 https://your-app.vercel.app
+👉 https://roommate-matcher-mu-roan.vercel.app/
 
 ---
 
