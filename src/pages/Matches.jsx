@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getAllUsers, calculateCompatibility, getMatchReasons } from "../services/matchService";
-import MatchCard from "../components/Matchcard"; // ✅ FIXED casing
+import MatchCard from "../components/MatchCard"; // ✅ FIXED casing
 import { motion } from "framer-motion";
 
 export default function Matches() {
