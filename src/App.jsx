@@ -3,8 +3,7 @@ import { lazy, Suspense } from "react";
 import { useAuth } from "./context/AuthContext";
 import ThemeToggle from "./components/ThemeToggle";
 
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
+const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Questionnaire = lazy(() => import("./pages/Questionnaire"));
 const Matches = lazy(() => import("./pages/Matches"));
@@ -29,8 +28,7 @@ export default function App() {
       <ThemeToggle />
       <Suspense fallback={<Loader />}>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<Auth />} />
           <Route
             path="/dashboard"
             element={
