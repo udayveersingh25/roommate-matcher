@@ -10,20 +10,25 @@ function Auth() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [gender, setGender] = useState("");
+  const [residence, setResidence] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const nav = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       if (isLogin) {
         await login(email, password);
         nav("/dashboard");
       } else {
-        await signup(email, password, fullName, gender);
+        await signup(email, password, fullName, gender, residence);
         nav("/dashboard");
       }
     } catch (err) {
       alert(err.message);
+      setIsSubmitting(false);
     }
   };
 
@@ -80,6 +85,20 @@ function Auth() {
                       <option value="Other">Other</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 uppercase tracking-wide">Residence</label>
+                    <select
+                      value={residence}
+                      onChange={(e) => setResidence(e.target.value)}
+                      required={!isLogin}
+                      className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-700/80 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-800 dark:text-slate-100"
+                    >
+                      <option value="" disabled>Select Residence</option>
+                      <option value="Uniworld-1">Uniworld-1</option>
+                      <option value="Uniworld-2">Uniworld-2</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
                 </>
               )}
               <div>
@@ -106,9 +125,17 @@ function Auth() {
               </div>
               <button 
                 type="submit"
-                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-4 flex justify-center rounded-2xl hover:from-violet-700 hover:to-indigo-700 transition-all duration-300 focus:ring-4 focus:ring-indigo-500/30 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transform hover:-translate-y-0.5 text-lg mt-4"
+                disabled={isSubmitting}
+                className={`w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-4 flex justify-center rounded-2xl transition-all duration-300 focus:ring-4 focus:ring-indigo-500/30 shadow-lg shadow-indigo-500/25 transform text-lg mt-4 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:from-violet-700 hover:to-indigo-700 hover:shadow-indigo-500/40 hover:-translate-y-0.5'}`}
               >
-                {isLogin ? "Log In" : "Sign Up"}
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  isLogin ? "Log In" : "Sign Up"
+                )}
               </button>
             </form>
 
@@ -122,6 +149,7 @@ function Auth() {
                   setPassword("");
                   setFullName("");
                   setGender("");
+                  setResidence("");
                 }} 
                 className="ml-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors font-bold underline decoration-2 underline-offset-4"
               >

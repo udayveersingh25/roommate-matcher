@@ -23,7 +23,7 @@ export default function Matches() {
                 }
 
                 const results = users
-                    .filter((u) => u.id !== user.uid && u.profile && u.gender === currentUser.gender) // ✅ skip incomplete users and filter by gender
+                    .filter((u) => u.id !== user.uid && u.profile && u.gender === currentUser.gender && u.residence === currentUser.residence) // ✅ skip incomplete users and filter by gender and residence
                     .map((u) => ({
                         ...u,
                         score: calculateCompatibility(currentUser, u),

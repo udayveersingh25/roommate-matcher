@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const signup = async (email, password, fullName, gender) => {
+  const signup = async (email, password, fullName, gender, residence) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     if (fullName) {
       await updateProfile(userCredential.user, { displayName: fullName });
@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
     
     await setDoc(doc(db, "users", userCredential.user.uid), {
       gender: gender || "Other",
+      residence: residence || "Other",
       fullName: fullName || email.split('@')[0],
       email: email
     }, { merge: true });
