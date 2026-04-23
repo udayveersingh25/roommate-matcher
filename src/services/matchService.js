@@ -24,13 +24,22 @@ export function calculateCompatibility(userA, userB) {
     let score = 0;
 
     for (let key in PROFILE_WEIGHTS) {
-        const diff = Math.abs(
-            userA.profile[key] - userB.profile[key]
-        );
-        score += PROFILE_WEIGHTS[key] * diff;
+        // Food is a binary 0|1 classification, other sliders are on a 9-point difference scale
+        const maxDiff = key === "food" ? 1 : 9;
+        const diff = Math.abs(userA.profile[key] - userB.profile[key]) / maxDiff;
+        
+        // Non-linear penalty: small diffs tolerated, massive diffs square exponentially
+        score += PROFILE_WEIGHTS[key] * Math.pow(diff, 2);
     }
 
-    return Math.round(100 - score * 10);
+    // 🚨 Hard penalties for irreconcilable roommate traits mathematically overriding standard weights
+    let penalty = 0;
+    if (Math.abs(userA.profile.sleep - userB.profile.sleep) > 6) penalty += 15;
+    if (Math.abs(userA.profile.cleanliness - userB.profile.cleanliness) > 6) penalty += 15;
+    if (Math.abs(userA.profile.noise - userB.profile.noise) > 6) penalty += 10;
+
+    let finalScore = 100 - score * 100 - penalty;
+    return Math.max(0, Math.round(finalScore));
 }
 
 export function getMatchReasons(userA, userB) {

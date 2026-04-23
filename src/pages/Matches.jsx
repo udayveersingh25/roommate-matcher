@@ -1,17 +1,71 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMatches } from "../hooks/useMatches";
 import MatchCard from "../components/MatchCard";
 import { motion } from "framer-motion";
 
+const SkeletonCard = () => (
+    <div className="bg-white/40 dark:bg-[#0f1225]/40 backdrop-blur-xl border border-white/60 dark:border-indigo-500/20 p-6 my-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(79,70,229,0.05)] animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-center border-b border-slate-100/80 dark:border-indigo-500/10 pb-5 mb-5">
+            <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700/50"></div>
+                <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700/50 rounded-lg"></div>
+            </div>
+            <div className="h-8 w-24 bg-slate-200 dark:bg-slate-700/50 rounded-full"></div>
+        </div>
+
+        {/* Radar/Traits Skeleton */}
+        <div className="mb-6 h-64 md:h-72 bg-slate-200/50 dark:bg-slate-700/30 rounded-2xl"></div>
+
+        {/* Reasons Skeleton */}
+        <div className="bg-slate-100/50 dark:bg-slate-800/30 rounded-2xl p-4 sm:p-5 mt-2 space-y-4">
+            <div className="h-3 w-1/4 bg-slate-200 dark:bg-slate-700/50 rounded-full"></div>
+            <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
+                <div className="h-3 w-3/4 bg-slate-200 dark:bg-slate-700/50 rounded-full"></div>
+            </div>
+            <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700/50 shrink-0"></div>
+                <div className="h-3 w-2/3 bg-slate-200 dark:bg-slate-700/50 rounded-full"></div>
+            </div>
+        </div>
+    </div>
+);
+
 export default function Matches() {
     const { matches, loading, currentUserProfile } = useMatches();
+    const nav = useNavigate();
 
-    // Safely memoize the mapped array of components so we only iterate when `matches` changes array ref
+    const [currentPage, setCurrentPage] = useState(1);
+    const matchesPerPage = 5;
+
+    // Pagination bounds
+    const indexOfLast = currentPage * matchesPerPage;
+    const indexOfFirst = indexOfLast - matchesPerPage;
+    const currentMatches = matches.slice(indexOfFirst, indexOfLast);
+    const totalPages = Math.ceil(matches.length / matchesPerPage);
+
+    // YouTube-style page mapping bounds
+    const getVisiblePages = () => {
+        let pages = [];
+        for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
+    const handlePageChange = (pageNum) => {
+        setCurrentPage(pageNum);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    // Safely memoize the mapped array of components so we only iterate when `currentMatches` changes array ref
     const renderedMatches = useMemo(() => {
-        return matches.map((match) => (
+        return currentMatches.map((match) => (
             <MatchCard key={match.id} match={match} currentUserProfile={currentUserProfile} />
         ));
-    }, [matches, currentUserProfile]);
+    }, [currentMatches, currentUserProfile]);
 
     return (
         <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-fuchsia-50 via-white to-violet-50 dark:bg-none dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-500">
@@ -20,6 +74,20 @@ export default function Matches() {
             <div className="absolute top-40 left-1/4 w-[30rem] h-[30rem] bg-fuchsia-200/40 dark:bg-fuchsia-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-50 dark:opacity-20 z-0 transition-colors duration-500"></div>
 
             <div className="max-w-3xl mx-auto space-y-6 relative z-10">
+                
+                {/* Navigation Button */}
+                <div className="mb-2">
+                    <button 
+                        onClick={() => nav("/dashboard")}
+                        className="flex items-center gap-2.5 px-5 py-2.5 bg-white/70 dark:bg-slate-800/60 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-sm text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-700/80 hover:text-indigo-600 dark:hover:text-indigo-400 hover:-translate-x-1 hover:shadow-md transition-all duration-300"
+                    >
+                        <svg className="w-5 h-5 stroke-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Dashboard
+                    </button>
+                </div>
+
                 <div className="mb-12 text-center">
                     <h1 className="text-4xl sm:text-5xl font-extrabold pb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-800 to-indigo-600 dark:from-violet-400 dark:to-indigo-300 tracking-tight mb-2">
                         Your Matches
@@ -34,9 +102,13 @@ export default function Matches() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex justify-center items-center py-20"
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex flex-col gap-6"
                     >
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-indigo-400 shadow-[0_0_15px_rgba(79,70,229,0.3)] dark:shadow-[0_0_15px_rgba(129,140,248,0.5)]"></div>
+                        {[1, 2, 3].map((key) => (
+                            <SkeletonCard key={key} />
+                        ))}
                     </motion.div>
                 ) : matches.length === 0 ? (
                     <motion.div
@@ -53,6 +125,41 @@ export default function Matches() {
                 ) : (
                     <div className="flex flex-col gap-6">
                         {renderedMatches}
+                        
+                        {/* Pagination Controls */}
+                        {matches.length > matchesPerPage && (
+                            <div className="mt-8 flex items-center justify-center space-x-2 pb-6">
+                                <button 
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="px-4 py-2 bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 rounded-xl font-bold border border-slate-200 dark:border-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
+                                >
+                                    Prev
+                                </button>
+                                
+                                {getVisiblePages().map(page => (
+                                    <button
+                                        key={page}
+                                        onClick={() => handlePageChange(page)}
+                                        className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold transition-all shadow-sm ${
+                                            currentPage === page 
+                                            ? "bg-indigo-600 text-white border-none scale-110 shadow-indigo-500/30" 
+                                            : "bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                <button 
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-4 py-2 bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 rounded-xl font-bold border border-slate-200 dark:border-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

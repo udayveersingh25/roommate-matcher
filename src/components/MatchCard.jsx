@@ -22,6 +22,18 @@ export default function MatchCard({ match, currentUserProfile }) {
         { subject: 'Study', user: currentUserProfile.study, match: study, fullMark: 10 },
     ];
 
+    const getMatchConfidence = (score) => {
+        if (score >= 75) return "Strong Match";
+        if (score >= 50) return "Moderate";
+        return "Risky";
+    };
+
+    const getBadgeStyling = (score) => {
+        if (score >= 75) return "from-emerald-400 to-teal-500 shadow-emerald-500/20";
+        if (score >= 50) return "from-amber-400 to-orange-500 shadow-orange-500/20";
+        return "from-rose-400 to-red-500 shadow-rose-500/20";
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -40,8 +52,8 @@ export default function MatchCard({ match, currentUserProfile }) {
                 </div>
                 
                 <div className="flex flex-col items-end">
-                    <span className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold px-4 py-1.5 rounded-full text-sm flex items-center shadow-md shadow-emerald-500/20">
-                        {match.score}% Match
+                    <span className={`bg-gradient-to-r text-white font-bold px-4 py-1.5 rounded-full text-sm flex items-center shadow-md ${getBadgeStyling(match.score)}`}>
+                        {match.score}% — {getMatchConfidence(match.score)}
                     </span>
                 </div>
             </div>
