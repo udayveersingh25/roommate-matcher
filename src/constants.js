@@ -5,7 +5,7 @@ export const PROFILE_TRAITS = [
     {
         id: "sleep",
         label: "Sleep Schedule",
-        leftLabel: "Early Bird (9 PM – 11 PM)",
+        leftLabel: "Early Bird (9 PM – 12 PM)",
         rightLabel: "Night Owl (4 AM – 6 AM)",
         badgeBg: "bg-indigo-100",
         badgeText: "text-indigo-700",

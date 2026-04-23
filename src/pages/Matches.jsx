@@ -57,7 +57,9 @@ export default function Matches() {
 
     const handlePageChange = (pageNum) => {
         setCurrentPage(pageNum);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 50);
     };
 
     // Safely memoize the mapped array of components so we only iterate when `currentMatches` changes array ref

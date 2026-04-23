@@ -97,7 +97,7 @@ export default function Questionnaire() {
             >
                 {/* Navigation Button */}
                 <div className="mb-6 flex justify-start">
-                    <button 
+                    <button
                         onClick={() => nav("/dashboard")}
                         className="flex items-center gap-2.5 px-5 py-2.5 bg-white/50 dark:bg-slate-700/40 backdrop-blur-md border border-slate-200/80 dark:border-slate-600/50 rounded-2xl shadow-sm text-slate-600 dark:text-slate-300 font-bold hover:bg-white dark:hover:bg-slate-700/80 hover:text-indigo-600 dark:hover:text-indigo-400 hover:-translate-x-1 hover:shadow-md transition-all duration-300"
                     >
@@ -145,7 +145,7 @@ export default function Questionnaire() {
                                         <div className="text-center mt-3 text-[11px] font-bold text-indigo-500/80 dark:text-indigo-400/80 uppercase tracking-wide bg-indigo-50/50 dark:bg-indigo-900/20 py-1.5 rounded-lg border border-indigo-100 dark:border-indigo-800/30">
                                             {formData.sleep <= 3 ? "🌙 Early Sleeper (Before 12 AM)" :
                                                 formData.sleep <= 7 ? "⚖️ Balanced (12 AM – 3 AM)" :
-                                                    "🦉 Late Sleeper (After 2 AM)"}
+                                                    "🦉 Late Sleeper (After 3 AM)"}
                                         </div>
                                     )}
                                 </div>

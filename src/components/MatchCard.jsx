@@ -43,16 +43,16 @@ export default function MatchCard({ match, currentUserProfile }) {
             className="bg-white/80 dark:bg-[#0f1225]/80 backdrop-blur-xl border border-white/60 dark:border-indigo-500/20 p-6 my-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(79,70,229,0.1)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_20px_40px_rgba(124,58,237,0.2)] dark:hover:border-indigo-500/40 transition-all duration-300 relative overflow-hidden"
         >
             {/* Header */}
-            <div className="flex justify-between items-center border-b border-slate-100/80 dark:border-indigo-500/10 pb-5 mb-5">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md text-lg">
+            <div className="flex justify-between items-center border-b border-slate-100/80 dark:border-indigo-500/10 pb-5 mb-5 gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white font-bold shadow-md text-lg shrink-0">
                         {(match.fullName || match.email || "?").charAt(0).toUpperCase()}
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 tracking-tight">{match.fullName || (match.email ? match.email.split('@')[0] : "User")}</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200 tracking-tight truncate">{match.fullName || (match.email ? match.email.split('@')[0] : "User")}</h3>
                 </div>
                 
-                <div className="flex flex-col items-end">
-                    <span className={`bg-gradient-to-r text-white font-bold px-4 py-1.5 rounded-full text-sm flex items-center shadow-md ${getBadgeStyling(match.score)}`}>
+                <div className="flex flex-col items-end shrink-0">
+                    <span className={`bg-gradient-to-r text-white font-bold px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-sm flex items-center shadow-md whitespace-nowrap ${getBadgeStyling(match.score)}`}>
                         {match.score}% — {getMatchConfidence(match.score)}
                     </span>
                 </div>
