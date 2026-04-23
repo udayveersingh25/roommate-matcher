@@ -4,6 +4,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "../utils/toast";
+import { PROFILE_TRAITS } from "../constants";
 
 export default function Questionnaire() {
     const { user } = useAuth();
@@ -29,16 +31,25 @@ export default function Questionnaire() {
         e.preventDefault();
 
         try {
+            const finalProfile = {
+                sleep: Number(formData.sleep),
+                cleanliness: Number(formData.cleanliness),
+                noise: Number(formData.noise),
+                social: Number(formData.social),
+                study: Number(formData.study),
+                food: Number(formData.food)
+            };
+
             await setDoc(doc(db, "users", user.uid), {
                 email: user.email,
                 fullName: user.displayName || user.email.split('@')[0],
-                profile: formData
+                profile: finalProfile
             }, { merge: true });
             nav("/matches");
-            alert("Profile saved!");
+            toast("Profile saved!");
 
         } catch (err) {
-            alert(err.message);
+            toast(err.message, 'error');
         }
     };
 
@@ -61,50 +72,28 @@ export default function Questionnaire() {
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-7">
-                        <div className="flex flex-col group">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex justify-between items-center">
-                                <span className="uppercase tracking-wider text-[11px]">Sleep Schedule</span>
-                                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs">{formData.sleep} / 10</span>
-                            </label>
-                            <input type="range" name="sleep" min="1" max="10" value={formData.sleep} onChange={handleChange} className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 transition-all hover:bg-slate-300" />
-                            <div className="flex justify-between text-[11px] text-slate-400 mt-2 font-bold tracking-wide uppercase"><span className="text-indigo-500">Early Bird</span><span className="text-purple-500">Night Owl</span></div>
-                        </div>
-
-                        <div className="flex flex-col group">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex justify-between items-center">
-                                <span className="uppercase tracking-wider text-[11px]">Cleanliness</span>
-                                <span className="bg-violet-100 text-violet-700 px-3 py-1 rounded-full text-xs">{formData.cleanliness} / 10</span>
-                            </label>
-                            <input type="range" name="cleanliness" min="1" max="10" value={formData.cleanliness} onChange={handleChange} className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 transition-all hover:bg-slate-300" />
-                            <div className="flex justify-between text-[11px] text-slate-400 mt-2 font-bold tracking-wide uppercase"><span className="text-violet-500">Messy</span><span className="text-fuchsia-500">Neat Freak</span></div>
-                        </div>
-
-                        <div className="flex flex-col group">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex justify-between items-center">
-                                <span className="uppercase tracking-wider text-[11px]">Noise Tolerance</span>
-                                <span className="bg-fuchsia-100 text-fuchsia-700 px-3 py-1 rounded-full text-xs">{formData.noise} / 10</span>
-                            </label>
-                            <input type="range" name="noise" min="1" max="10" value={formData.noise} onChange={handleChange} className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-fuchsia-500 transition-all hover:bg-slate-300" />
-                            <div className="flex justify-between text-[11px] text-slate-400 mt-2 font-bold tracking-wide uppercase"><span className="text-fuchsia-500">Strictly Quiet</span><span className="text-pink-500">Loud</span></div>
-                        </div>
-
-                        <div className="flex flex-col group">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex justify-between items-center">
-                                <span className="uppercase tracking-wider text-[11px]">Social Level</span>
-                                <span className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-xs">{formData.social} / 10</span>
-                            </label>
-                            <input type="range" name="social" min="1" max="10" value={formData.social} onChange={handleChange} className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-pink-500 transition-all hover:bg-slate-300" />
-                            <div className="flex justify-between text-[11px] text-slate-400 mt-2 font-bold tracking-wide uppercase"><span className="text-pink-500">Introverted</span><span className="text-rose-500">Extroverted</span></div>
-                        </div>
-
-                        <div className="flex flex-col group">
-                            <label className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex justify-between items-center">
-                                <span className="uppercase tracking-wider text-[11px]">Study Intensity</span>
-                                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">{formData.study} / 10</span>
-                            </label>
-                            <input type="range" name="study" min="1" max="10" value={formData.study} onChange={handleChange} className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500 transition-all hover:bg-slate-300" />
-                            <div className="flex justify-between text-[11px] text-slate-400 mt-2 font-bold tracking-wide uppercase"><span className="text-blue-500">Relaxed</span><span className="text-sky-500">Intense</span></div>
-                        </div>
+                        {PROFILE_TRAITS.map(trait => (
+                            <div key={trait.id} className="flex flex-col group">
+                                <label className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 flex justify-between items-center">
+                                    <span className="uppercase tracking-wider text-[11px]">{trait.label}</span>
+                                    <span className={`${trait.badgeBg} ${trait.badgeText} px-3 py-1 rounded-full text-xs`}>
+                                        {formData[trait.id]} / 10
+                                    </span>
+                                </label>
+                                <input 
+                                    type="range" 
+                                    name={trait.id} 
+                                    min="1" max="10" 
+                                    value={formData[trait.id]} 
+                                    onChange={handleChange} 
+                                    className={`w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer ${trait.accent} transition-all hover:bg-slate-300`} 
+                                />
+                                <div className="flex justify-between text-[11px] text-slate-400 mt-2 font-bold tracking-wide uppercase">
+                                    <span className={trait.leftText}>{trait.leftLabel}</span>
+                                    <span className={trait.rightText}>{trait.rightLabel}</span>
+                                </div>
+                            </div>
+                        ))}
 
                         <div className="flex flex-col pt-6 border-t border-slate-200/60 dark:border-slate-700/60 mt-4">
                             <label className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-3 uppercase tracking-wider text-[11px]">Food Preference</label>

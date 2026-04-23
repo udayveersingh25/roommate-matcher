@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "../utils/toast";
+import { GENDER_OPTIONS, RESIDENCE_OPTIONS } from "../constants";
 
 function Auth() {
   const { login, signup } = useAuth();
@@ -27,7 +29,7 @@ function Auth() {
         nav("/dashboard");
       }
     } catch (err) {
-      alert(err.message);
+      toast(err.message, 'error');
       setIsSubmitting(false);
     }
   };
@@ -80,9 +82,9 @@ function Auth() {
                       className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-700/80 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-800 dark:text-slate-100"
                     >
                       <option value="" disabled>Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
+                      {GENDER_OPTIONS.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -94,9 +96,9 @@ function Auth() {
                       className="w-full px-5 py-3.5 bg-white/50 dark:bg-slate-900/50 border-2 border-slate-200/80 dark:border-slate-700/80 rounded-2xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-medium text-slate-800 dark:text-slate-100"
                     >
                       <option value="" disabled>Select Residence</option>
-                      <option value="Uniworld-1">Uniworld-1</option>
-                      <option value="Uniworld-2">Uniworld-2</option>
-                      <option value="Other">Other</option>
+                      {RESIDENCE_OPTIONS.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
                     </select>
                   </div>
                 </>

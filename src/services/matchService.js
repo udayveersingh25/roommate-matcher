@@ -1,8 +1,19 @@
 import { db } from "./firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { PROFILE_WEIGHTS } from "../constants";
 
-export async function getAllUsers() {
-    const snapshot = await getDocs(collection(db, "users"));
+export async function getAllUsers(filters) {
+    let usersRef = collection(db, "users");
+    
+    if (filters && filters.gender && filters.residence) {
+        usersRef = query(
+            usersRef,
+            where("residence", "==", filters.residence),
+            where("gender", "==", filters.gender)
+        );
+    }
+    
+    const snapshot = await getDocs(usersRef);
 
     return snapshot.docs.map(doc => ({
         id: doc.id,
@@ -10,22 +21,13 @@ export async function getAllUsers() {
     }));
 }
 export function calculateCompatibility(userA, userB) {
-    const weights = {
-        sleep: 0.2,
-        cleanliness: 0.2,
-        noise: 0.15,
-        social: 0.15,
-        study: 0.15,
-        food: 0.15
-    };
-
     let score = 0;
 
-    for (let key in weights) {
+    for (let key in PROFILE_WEIGHTS) {
         const diff = Math.abs(
             userA.profile[key] - userB.profile[key]
         );
-        score += weights[key] * diff;
+        score += PROFILE_WEIGHTS[key] * diff;
     }
 
     return Math.round(100 - score * 10);

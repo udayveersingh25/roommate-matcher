@@ -1,53 +1,17 @@
-import { useEffect, useState, useMemo } from "react";
-import { useAuth } from "../context/AuthContext";
-import { getAllUsers, calculateCompatibility, getMatchReasons } from "../services/matchService";
-import MatchCard from "../components/MatchCard"; // ✅ FIXED casing
+import { useMemo } from "react";
+import { useMatches } from "../hooks/useMatches";
+import MatchCard from "../components/MatchCard";
 import { motion } from "framer-motion";
 
 export default function Matches() {
-    const { user } = useAuth();
-    const [matches, setMatches] = useState([]);
-    const [loading, setLoading] = useState(true); // ✅ added loading state
-
-    useEffect(() => {
-        async function fetchMatches() {
-            try {
-                const users = await getAllUsers();
-
-                // 🛑 Guard: ensure current user exists
-                const currentUser = users.find((u) => u.id === user.uid);
-                if (!currentUser || !currentUser.profile) {
-                    setMatches([]);
-                    setLoading(false);
-                    return;
-                }
-
-                const results = users
-                    .filter((u) => u.id !== user.uid && u.profile && u.gender === currentUser.gender && u.residence === currentUser.residence) // ✅ skip incomplete users and filter by gender and residence
-                    .map((u) => ({
-                        ...u,
-                        score: calculateCompatibility(currentUser, u),
-                        reasons: getMatchReasons(currentUser, u)
-                    }))
-                    .sort((a, b) => b.score - a.score);
-
-                setMatches(results);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        if (user) fetchMatches();
-    }, [user]);
+    const { matches, loading, currentUserProfile } = useMatches();
 
     // Safely memoize the mapped array of components so we only iterate when `matches` changes array ref
     const renderedMatches = useMemo(() => {
         return matches.map((match) => (
-            <MatchCard key={match.id} match={match} />
+            <MatchCard key={match.id} match={match} currentUserProfile={currentUserProfile} />
         ));
-    }, [matches]);
+    }, [matches, currentUserProfile]);
 
     return (
         <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-fuchsia-50 via-white to-violet-50 dark:bg-none dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-500">

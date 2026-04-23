@@ -1,16 +1,43 @@
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { db } from "../services/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Dashboard() {
     const { user, logout } = useAuth();
     const nav = useNavigate();
 
-    // Memoize navigation and logout handlers
     const handleNavigateMatches = useCallback(() => nav("/matches"), [nav]);
     const handleNavigatePref = useCallback(() => nav("/questionnaire"), [nav]);
     const handleLogout = useCallback(() => logout(), [logout]);
+
+    const [isProfileComplete, setIsProfileComplete] = useState(true);
+    const [loadingProfile, setLoadingProfile] = useState(true);
+
+    useEffect(() => {
+        async function fetchUserProfile() {
+            if (!user) return;
+            try {
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (!data.profile) {
+                        setIsProfileComplete(false);
+                    }
+                } else {
+                    setIsProfileComplete(false);
+                }
+            } catch (err) {
+                console.error("Error fetching user profile:", err);
+            } finally {
+                setLoadingProfile(false);
+            }
+        }
+        fetchUserProfile();
+    }, [user]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-indigo-50 via-white to-purple-50 dark:bg-none dark:bg-slate-950 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-500">
@@ -38,6 +65,19 @@ export default function Dashboard() {
                             {user?.email || "user@example.com"}
                         </p>
                     </div>
+
+                    {!loadingProfile && !isProfileComplete && (
+                        <div 
+                            onClick={handleNavigatePref}
+                            className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 text-yellow-800 dark:text-yellow-200 p-4 rounded-xl mb-8 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors text-sm text-left font-medium flex gap-3 shadow-sm"
+                        >
+                            <span className="text-yellow-500 text-lg leading-none">⚠️</span>
+                            <div>
+                                <strong className="block mb-1">Your profile is incomplete</strong> 
+                                Matches won't show until you fill your preferences. <span className="underline font-bold text-yellow-600 dark:text-yellow-300">Fill it out now</span>.
+                            </div>
+                        </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="space-y-4">

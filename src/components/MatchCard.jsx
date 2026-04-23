@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
-export default function MatchCard({ match }) {
+export default function MatchCard({ match, currentUserProfile }) {
     // 🛑 Prevent crash if profile is missing
-    if (!match || !match.profile) return null;
+    if (!match || !match.profile || !currentUserProfile) return null;
 
     const {
         sleep,
@@ -13,12 +14,13 @@ export default function MatchCard({ match }) {
         food
     } = match.profile;
 
-    // Helper for visual progress bars
-    const renderBar = (val, colorClass) => (
-        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden shadow-inner dark:shadow-black/20">
-            <div className={`h-1.5 rounded-full ${colorClass}`} style={{ width: `${(val / 10) * 100}%` }}></div>
-        </div>
-    );
+    const data = [
+        { subject: 'Sleep', user: currentUserProfile.sleep, match: sleep, fullMark: 10 },
+        { subject: 'Cleanliness', user: currentUserProfile.cleanliness, match: cleanliness, fullMark: 10 },
+        { subject: 'Noise', user: currentUserProfile.noise, match: noise, fullMark: 10 },
+        { subject: 'Social', user: currentUserProfile.social, match: social, fullMark: 10 },
+        { subject: 'Study', user: currentUserProfile.study, match: study, fullMark: 10 },
+    ];
 
     return (
         <motion.div
@@ -44,31 +46,27 @@ export default function MatchCard({ match }) {
                 </div>
             </div>
 
-            {/* Traits */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-6 text-sm mb-6">
-                <div className="flex flex-col">
-                    <div className="flex justify-between items-end"><span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">Sleep</span> <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">{sleep}/10</span></div>
-                    {renderBar(sleep, "bg-indigo-400")}
-                </div>
-                <div className="flex flex-col">
-                    <div className="flex justify-between items-end"><span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">Cleanliness</span> <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">{cleanliness}/10</span></div>
-                    {renderBar(cleanliness, "bg-violet-400")}
-                </div>
-                <div className="flex flex-col">
-                    <div className="flex justify-between items-end"><span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">Noise</span> <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">{noise}/10</span></div>
-                    {renderBar(noise, "bg-fuchsia-400")}
-                </div>
-                <div className="flex flex-col">
-                    <div className="flex justify-between items-end"><span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">Social</span> <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">{social}/10</span></div>
-                    {renderBar(social, "bg-pink-400")}
-                </div>
-                <div className="flex flex-col">
-                    <div className="flex justify-between items-end"><span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">Study</span> <span className="font-semibold text-slate-700 dark:text-slate-300 text-xs">{study}/10</span></div>
-                    {renderBar(study, "bg-blue-400")}
-                </div>
-                <div className="flex flex-col justify-end">
-                    <span className="text-slate-400 dark:text-indigo-300 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase mb-1">Food</span>
-                    <span className="font-semibold text-slate-700 dark:text-indigo-100 text-xs sm:text-sm bg-slate-100/80 dark:bg-indigo-900/30 border border-transparent dark:border-indigo-500/20 px-2 py-1 sm:px-3 sm:py-1 rounded-lg inline-block w-fit whitespace-nowrap shadow-sm dark:shadow-none">
+            {/* Traits Radar */}
+            <div className="mb-6 h-64 md:h-72 bg-slate-50/50 dark:bg-[#141830]/50 rounded-2xl border border-slate-100 dark:border-indigo-500/10 p-2 relative">
+                <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data}>
+                        <PolarGrid strokeOpacity={0.2} />
+                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#818cf8', fontSize: 12, fontWeight: 600 }} />
+                        <Radar name="You" dataKey="user" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.4} />
+                        <Radar name="Match" dataKey="match" stroke="#10b981" fill="#10b981" fillOpacity={0.4} />
+                        <Tooltip 
+                            wrapperClassName="scale-90 opacity-95 shadow-xl"
+                            contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', padding: '12px 16px' }}
+                            itemStyle={{ fontWeight: 600, fontSize: '13px', paddingTop: '2px' }}
+                            labelStyle={{ color: '#cbd5e1', fontWeight: 800, marginBottom: '6px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                        />
+                        <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                    </RadarChart>
+                </ResponsiveContainer>
+                
+                <div className="absolute top-2 right-4 flex flex-col justify-end">
+                    <span className="text-slate-400 dark:text-indigo-300 text-[10px] font-bold tracking-widest uppercase mb-1 text-right">Food</span>
+                    <span className="font-semibold text-slate-700 dark:text-indigo-100 text-[11px] bg-slate-100/80 dark:bg-indigo-900/30 border border-transparent dark:border-indigo-500/20 px-2 py-1 rounded-lg inline-block whitespace-nowrap shadow-sm dark:shadow-none">
                         {food === 0 ? "🥗 Vegetarian" : "🥩 Non-Veg"}
                     </span>
                 </div>
