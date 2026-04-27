@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "../utils/toast";
-import { fetchAndSyncConnections, respondToInvite, unsendInviteById } from "../services/connectionService";
+import { fetchAndSyncConnections, respondToInvite, unsendInviteById, removeConnection } from "../services/connectionService";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 
@@ -16,6 +16,7 @@ export default function Connections() {
     const [outgoingInvites, setOutgoingInvites] = useState([]);
     const [connections, setConnections] = useState([]);
     const [actionLoading, setActionLoading] = useState(null);
+    const [removeModal, setRemoveModal] = useState({ isOpen: false, targetId: null, targetName: "" });
 
     useEffect(() => {
         let isMounted = true;
@@ -89,6 +90,28 @@ export default function Connections() {
             await unsendInviteById(inviteId);
             toast("Invite cancelled.");
             setOutgoingInvites(prev => prev.filter(i => i.id !== inviteId));
+        } catch (err) {
+            toast(err.message, "error");
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleRemoveConnection = (targetId, targetName) => {
+        setRemoveModal({ isOpen: true, targetId, targetName });
+    };
+
+    const confirmRemoveConnection = async () => {
+        const { targetId } = removeModal;
+        if (!user || !targetId || actionLoading) return;
+        
+        setActionLoading(targetId);
+        setRemoveModal({ isOpen: false, targetId: null, targetName: "" });
+
+        try {
+            await removeConnection(user.uid, targetId);
+            toast("Connection removed.");
+            setConnections(prev => prev.filter(c => c.id !== targetId));
         } catch (err) {
             toast(err.message, "error");
         } finally {
@@ -219,18 +242,28 @@ export default function Connections() {
                                                         <span className="inline-block mt-0.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider rounded-md border border-emerald-200 dark:border-emerald-800/30">Connected</span>
                                                     </div>
                                                 </div>
-                                                <button 
-                                                    onClick={() => {
-                                                        if (u.email) {
-                                                            window.location.href = `mailto:${u.email}`;
-                                                        } else {
-                                                            toast("User email not available.", "error");
-                                                        }
-                                                    }}
-                                                    className="w-full mt-auto py-2.5 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-900/30 text-slate-600 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 font-bold rounded-xl transition-colors border border-slate-200 dark:border-slate-700 dark:hover:border-indigo-500/30"
-                                                >
-                                                    Message User
-                                                </button>
+                                                <div className="flex gap-2 w-full mt-auto">
+                                                    <button 
+                                                        onClick={() => {
+                                                            if (u.email) {
+                                                                window.location.href = `mailto:${u.email}`;
+                                                            } else {
+                                                                toast("User email not available.", "error");
+                                                            }
+                                                        }}
+                                                        className="flex-1 py-2.5 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-900/30 text-slate-600 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300 font-bold rounded-xl transition-colors border border-slate-200 dark:border-slate-700 dark:hover:border-indigo-500/30"
+                                                    >
+                                                        Message
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemoveConnection(u.id, u.fullName || u.email)}
+                                                        disabled={actionLoading === u.id}
+                                                        className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 font-bold rounded-xl transition-colors border border-rose-200 dark:border-rose-900/50 disabled:opacity-50"
+                                                        title="Remove Connection"
+                                                    >
+                                                        {actionLoading === u.id ? "..." : "Remove"}
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -240,6 +273,55 @@ export default function Connections() {
                     </div>
                 )}
             </div>
+
+            {/* Custom Confirmation Modal */}
+            <AnimatePresence>
+                {removeModal.isOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                        {/* Backdrop */}
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setRemoveModal({ isOpen: false, targetId: null, targetName: "" })}
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        />
+                        {/* Modal Content */}
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4 mx-auto">
+                                <svg className="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">
+                                Remove Connection?
+                            </h3>
+                            <p className="text-center text-slate-600 dark:text-slate-400 mb-6 font-medium">
+                                Are you sure you want to remove <span className="font-bold text-slate-900 dark:text-white">{removeModal.targetName}</span> from your network? You will no longer be connected.
+                            </p>
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => setRemoveModal({ isOpen: false, targetId: null, targetName: "" })}
+                                    className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={confirmRemoveConnection}
+                                    className="flex-1 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-colors shadow-md shadow-rose-500/20"
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

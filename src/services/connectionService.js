@@ -165,3 +165,31 @@ export async function fetchAndSyncConnections(userId) {
         connectionsIds: Array.from(existingConnections) 
     };
 }
+
+/**
+ * Removes an existing connection between two users
+ */
+export async function removeConnection(currentUserId, targetUserId) {
+    // Remove from current user's connections
+    const currentUserConnRef = doc(db, `connections/${currentUserId}/userConnections`, targetUserId);
+    await deleteDoc(currentUserConnRef);
+
+    // Remove from target user's connections
+    const targetUserConnRef = doc(db, `connections/${targetUserId}/userConnections`, currentUserId);
+    await deleteDoc(targetUserConnRef);
+
+    // Remove any accepted invites between the two users
+    const invitesRef = collection(db, "invites");
+    
+    const q1 = query(invitesRef, where("fromUserId", "==", currentUserId), where("toUserId", "==", targetUserId));
+    const snap1 = await getDocs(q1);
+    for (const d of snap1.docs) {
+        await deleteDoc(d.ref);
+    }
+
+    const q2 = query(invitesRef, where("fromUserId", "==", targetUserId), where("toUserId", "==", currentUserId));
+    const snap2 = await getDocs(q2);
+    for (const d of snap2.docs) {
+        await deleteDoc(d.ref);
+    }
+}
