@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { useAuth } from "../context/AuthContext";
+import { sendInvite, unsendInviteByUsers } from "../services/connectionService";
+import { toast } from "../utils/toast";
 
 export default function MatchCard({ match, currentUserProfile }) {
     // 🛑 Prevent crash if profile is missing
@@ -13,6 +17,38 @@ export default function MatchCard({ match, currentUserProfile }) {
         study,
         food
     } = match.profile;
+
+    const { user } = useAuth();
+    const [localInviteStatus, setLocalInviteStatus] = useState(match.inviteStatus || "none");
+    const [isInviting, setIsInviting] = useState(false);
+
+    const handleInvite = async () => {
+        if (match.score < 75 || isInviting || localInviteStatus !== "none") return;
+        setIsInviting(true);
+        try {
+            await sendInvite(user.uid, match);
+            setLocalInviteStatus("pending");
+            toast("Invite successfully sent!");
+        } catch (err) {
+            toast(err.message, "error");
+        } finally {
+            setIsInviting(false);
+        }
+    };
+
+    const handleUnsend = async () => {
+        if (isInviting || localInviteStatus !== "pending") return;
+        setIsInviting(true);
+        try {
+            await unsendInviteByUsers(user.uid, match.id);
+            setLocalInviteStatus("none");
+            toast("Invite unsent.");
+        } catch (err) {
+            toast(err.message, "error");
+        } finally {
+            setIsInviting(false);
+        }
+    };
 
     const data = [
         { subject: 'Sleep', user: currentUserProfile.sleep, match: sleep, fullMark: 10 },
@@ -102,6 +138,51 @@ export default function MatchCard({ match, currentUserProfile }) {
             {match.reasons && match.reasons.length === 0 && (
                 <p className="text-sm text-slate-500 dark:text-slate-400 italic mt-2">No specific match reasons found.</p>
             )}
+
+            {/* Invite Actions Layer */}
+            <div className="pt-5 mt-5 border-t border-slate-100/80 dark:border-indigo-500/10">
+                {localInviteStatus === "connected" ? (
+                     <button disabled className="w-full py-3.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-2xl font-bold flex justify-center items-center gap-2 border border-emerald-200 dark:border-emerald-800/50 shadow-sm cursor-not-allowed">
+                     <span className="text-lg">🤝</span> You are Connected
+                 </button>
+                ) : localInviteStatus === "pending" ? (
+                    <div className="flex gap-2">
+                        <button disabled className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 rounded-2xl font-bold flex justify-center items-center gap-2 border border-slate-200 dark:border-slate-700 shadow-sm cursor-not-allowed">
+                            <span className="text-lg animate-pulse">⏳</span> Pending
+                        </button>
+                        <button 
+                            onClick={handleUnsend}
+                            disabled={isInviting}
+                            className="px-6 py-3.5 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:hover:bg-rose-900/40 rounded-2xl font-bold transition-all border border-rose-100 dark:border-rose-900/50 shadow-sm disabled:opacity-50 flex justify-center items-center shrink-0"
+                            title="Undo Invite"
+                        >
+                            {isInviting ? <div className="w-5 h-5 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin"></div> : "Undo"}
+                        </button>
+                    </div>
+                ) : (
+                    <button 
+                        onClick={handleInvite}
+                        disabled={match.score < 75 || isInviting}
+                        className={`w-full py-3.5 rounded-2xl font-bold flex justify-center items-center gap-2 transition-all duration-300 shadow-md ${
+                            match.score < 75 
+                            ? 'bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700/50' 
+                            : isInviting
+                                ? 'bg-indigo-400 text-white cursor-wait'
+                                : 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/25'
+                        }`}
+                    >
+                        {isInviting ? (
+                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        ) : match.score < 75 ? (
+                            "Score must be 75%+ to invite"
+                        ) : (
+                            <>
+                                <span className="text-lg">👋</span> Send Invite
+                            </>
+                        )}
+                    </button>
+                )}
+            </div>
         </motion.div>
     );
 }

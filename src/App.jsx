@@ -7,10 +7,16 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Questionnaire = lazy(() => import("./pages/Questionnaire"));
 const Matches = lazy(() => import("./pages/Matches"));
+const Connections = lazy(() => import("./pages/Connections"));
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
   return user ? children : <Navigate to="/" replace />;
+}
+
+function AuthRoute({ children }) {
+  const { user } = useAuth();
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 // Minimal loading fallback for Suspense that respects the core layout styling
@@ -28,7 +34,14 @@ export default function App() {
       <ThemeToggle />
       <Suspense fallback={<Loader />}>
         <Routes>
-          <Route path="/" element={<Auth />} />
+          <Route 
+            path="/" 
+            element={
+              <AuthRoute>
+                <Auth />
+              </AuthRoute>
+            } 
+          />
           <Route
             path="/dashboard"
             element={
@@ -53,6 +66,16 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/connections"
+            element={
+              <ProtectedRoute>
+                <Connections />
+              </ProtectedRoute>
+            }
+          />
+          {/* Catch-all route gracefully sends strays back to the Auth flow */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

@@ -10,6 +10,7 @@ export default function Dashboard() {
     const nav = useNavigate();
 
     const handleNavigateMatches = useCallback(() => nav("/matches"), [nav]);
+    const handleNavigateConnections = useCallback(() => nav("/connections"), [nav]);
     const handleNavigatePref = useCallback(() => nav("/questionnaire"), [nav]);
     const handleLogout = useCallback(() => logout(), [logout]);
 
@@ -86,6 +87,13 @@ export default function Dashboard() {
                             className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-4 flex justify-center rounded-2xl hover:from-violet-700 hover:to-indigo-700 transition-all duration-300 focus:ring-4 focus:ring-indigo-500/30 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transform hover:-translate-y-0.5 text-lg"
                         >
                             Find Roommates
+                        </button>
+
+                        <button 
+                            onClick={handleNavigateConnections}
+                            className="w-full bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-400 border-2 border-indigo-100 dark:border-slate-700 font-bold py-4 flex justify-center items-center gap-2 rounded-2xl hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all duration-300 focus:ring-4 focus:ring-indigo-500/10 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 text-lg"
+                        >
+                            <span className="text-xl">🤝</span> My Connections
                         </button>
                         
                         <button 
